@@ -53,10 +53,14 @@ fn collatz_conjecture (mut n: u64)
 
 - Add this line to your `Cargo.toml` (under `[dependencies]`):
   ```toml
-  candy = "0.1.0"
+  candy = "0.1.1"
   ```
 
 - Add this to your `.rs` code:
   ```rust
   #[macro_use] extern crate candy;
   ```
+
+[Repository]: https://github.com/danielhenrymantilla/stackvec-rs
+[Documentation]: https://docs.rs/stackvec/0.2.1/
+[crates.io]: https://crates.io/crates/stackvec
