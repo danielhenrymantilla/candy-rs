@@ -1,0 +1,28 @@
+[package]
+name = "candy"
+version = "0.1.0"
+authors = ["danielhenrymantilla <daniel.henry.mantilla@gmail.com>"]
+edition = "2018"
+
+description = "Ever wanted to **suck**? Here, have some **sweet sugared** candy."
+
+documentation = "https://docs.rs/candy/"
+homepage = "https://github.com/danielhenrymantilla/candy-rs"
+repository = "https://github.com/danielhenrymantilla/candy-rs"
+
+readme = "README.md"
+
+keywords = ["candy", "sugar", "sweet", "macros", "fallible"]
+
+categories = ["no-std", "rust-patterns", "api-bindings"]
+
+license = "MIT"
+
+[dependencies]
+
+[features]
+default = []
+nightly = []
+
+[package.metadata.docs.rs]
+features = [ "nightly" ]
