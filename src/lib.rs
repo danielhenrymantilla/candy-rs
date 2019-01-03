@@ -6,7 +6,7 @@
 //!
 //! #### This crate provides some syntaxic sugar for Rust, in the shape of macros.
 #![cfg_attr(feature = "nightly",
-    doc = "# Example"
+    doc = "# Examples"
 )]
 #![cfg_attr(feature = "nightly",
     doc = "```rust"
@@ -18,6 +18,25 @@
     doc = "```"
 )]
 
+
+#![cfg_attr(feature = "nightly",
+    doc = ""
+)]
+
+#![cfg_attr(feature = "nightly",
+    doc = "```rust"
+)]
+#![cfg_attr(feature = "nightly",
+    doc(include = "../examples/catch.rs")
+)]
+#![cfg_attr(feature = "nightly",
+    doc = "```"
+)]
+
+
+#![cfg_attr(feature = "try-trait",
+    feature(try_trait)
+)]
 
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/candy/0.1.0")]
@@ -63,24 +82,79 @@ macro_rules! not {($cond:expr) => (
 
 /// Sugar for early-returning an error: `return Err($err_value.into())`
 #[macro_export]
-macro_rules! throw {($err_value:expr) => (
-    return $crate::_core::result::Result::Err($err_value.into())
-)}
+macro_rules! throw {($err_value:expr) => ({
+    #[cfg(not(feature = "try-trait"))] {
+        return $crate::_core::result::Result::Err($err_value.into())
+    }
+    #[cfg(feature = "try-trait")] {
+        return $crate::_core::ops::Try::from_err($err_value.into())
+    }
+})}
 
 /// Sugar for early-returning a success: `return Ok($ok_value.into())`
 #[macro_export]
-macro_rules! ret {($ok_value:expr) => (
-    return $crate::_core::result::Result::Ok($ok_value.into())
-)}
+macro_rules! ret {($ok_value:expr) => ({
+    #[cfg(not(feature = "try-trait"))] {
+        return $crate::_core::result::Result::Ok($ok_value.into())
+    }
+    #[cfg(feature = "try-trait")] {
+        return $crate::_core::ops::Try::from_ok($ok_value.into())
+    }
+})}
 
 
-#[doc = "Sugar for the pervasive `-> Result<T, E>`"]
-#[doc = "fallible return type pattern."]
-#[doc = ""]
-#[doc = "It transforms it into `-> T =>! E`, and disposes of the need to wrap"]
-#[doc = "the implicit return value of the function in a `Ok(...)`."]
-#[doc = "In other words, **no more `Ok(())`!**"]
-#[doc = ""]
+/// Sugar for an expression block catching early-returns.
+///
+/// To be used when the return type is a [`Result`],
+/// to enable writing "try-catch"-like blocks within a function's body.
+///
+#[doc = "# Example"]
+#[cfg_attr(feature = "nightly",
+    doc = "```rust"
+)]
+#[cfg_attr(feature = "nightly",
+    doc(include = "../examples/catch.rs")
+)]
+#[cfg_attr(feature = "nightly",
+    doc = "```"
+)]
+#[cfg_attr(not(feature = "nightly"),
+    doc = "See [crates.io](https://crates.io/crates/candy)"
+)]
+#[cfg_attr(not(feature = "nightly"),
+    doc = "for an example."
+)]
+#[macro_export]
+macro_rules! catch {
+    (
+        { $($body:tt)* } -> $ok_ty:ty =>! $err_ty:ty
+    ) => (
+        (|| -> $crate::_core::result::Result<$ok_ty, $err_ty>
+        {
+            #[cfg(not(feature = "try-trait"))] {
+                $crate::_core::result::Result::Ok({$($body)*})
+            }
+            #[cfg(feature = "try-trait")] {
+                $crate::_core::ops::Try::from_ok({$($body)*})
+            }
+        })()
+    );
+
+    {
+        $($body:tt)*
+    } => (
+        catch!({$($body)*} -> _ =>! _)
+    );
+}
+
+
+/// Sugar for the pervasive `-> Result<T, E>`
+/// fallible return type pattern.
+///
+/// It transforms it into `-> T =>! E`, and disposes of the need to wrap
+/// the implicit return value of the function in a `Ok(...)`.
+/// In other words, **no more `Ok(())`!**
+///
 #[doc = "# Example"]
 #[cfg_attr(feature = "nightly",
     doc = "```rust"
@@ -119,7 +193,13 @@ macro_rules! fallible {
         {
             let _ret = $fbody;
             #[allow(unreachable_code)]
-            $crate::_core::result::Result::Ok(_ret)
+            #[cfg(not(feature = "try-trait"))] {
+                $crate::_core::result::Result::Ok(_ret)
+            }
+            #[allow(unreachable_code)]
+            #[cfg(feature = "try-trait")] {
+                $crate::_core::ops::Try::from_ok(_ret)
+            }
         }
     );
 

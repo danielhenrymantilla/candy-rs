@@ -1,13 +1,15 @@
 # candy-rs
-Syntaxic sugar for Rust
+Syntaxic sugar for Rust: macros for lighter error handling code, and more.
 
 [![Repository](https://img.shields.io/badge/repository-GitHub-brightgreen.svg)][Repository]
 [![Latest version](https://img.shields.io/crates/v/candy.svg)][crates.io]
 [![Documentation](https://docs.rs/candy/badge.svg)][Documentation]
 [![License](https://img.shields.io/crates/l/candy.svg)](https://github.com/danielhenrymantilla/candy-rs#license)
 
-## Example
+## Examples
 ```rust
+//! Run with `cargo run --example do_loop -- <number>`
+
 #[macro_use] extern crate candy;
 
 use ::std::*;
@@ -16,7 +18,7 @@ type ErrorMsg = borrow::Cow<'static, str>;
 
 fallible!{
 fn main ()
-    -> ()
+    ->  ()
     =>! ErrorMsg
 :
     let input_number: u64 = {
@@ -49,11 +51,62 @@ fn collatz_conjecture (mut n: u64)
 }
 ```
 
+```rust
+//! Run with `cargo run --example catch`
+
+#[macro_use] extern crate candy;
+
+use ::std::{
+    *,
+    io::Write,
+};
+
+fn main ()
+{
+    debug_print_all([0b101010, 0x45].iter())
+}
+
+fn debug_print_all<T: fmt::Debug> (
+    iterable: impl IntoIterator<Item = T>,
+)
+{
+    let to_stdout = &mut io::stdout();
+    
+    // `catch!` allows using the `?` operator. Isn't that nice?
+    match catch!({
+        write!(to_stdout, "[")?;
+        let mut iterator = iterable.into_iter();
+        let mut count = 0;
+        if let Some(first) = iterator.next() {
+            count += 1;
+            write!(to_stdout, "{:?}", first)?;
+            while let Some(next) = iterator.next() {
+                count += 1;
+                write!(to_stdout, ", {:?}", next)?;
+            };
+        };
+        write!(to_stdout, "]\n")?;
+        count
+    } -> usize =>! io::Error)
+    {
+        Err(io_err) => {
+            eprintln!(
+                "{:?} : could not write to stdout!? Oh well, who cares?",
+                io_err,
+            );
+        },
+        Ok(n) => {
+            eprintln!("Successfully wrote {} elements to stdout", n);
+        },
+    }
+}
+```
+
 ## Usage
 
 - Add this line to your `Cargo.toml` (under `[dependencies]`):
   ```toml
-  candy = "0.1.2"
+  candy = "0.1.3"
   ```
 
 - Add this to your `.rs` code:
@@ -62,5 +115,5 @@ fn collatz_conjecture (mut n: u64)
   ```
 
 [Repository]: https://github.com/danielhenrymantilla/candy-rs
-[Documentation]: https://docs.rs/candy/0.1.2/
+[Documentation]: https://docs.rs/candy/0.1.3/
 [crates.io]: https://crates.io/crates/candy

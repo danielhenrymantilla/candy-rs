@@ -8,7 +8,7 @@ type ErrorMsg = borrow::Cow<'static, str>;
 
 fallible!{
 fn main ()
-    -> ()
+    ->  ()
     =>! ErrorMsg
 :
     let input_number: u64 = {
@@ -17,11 +17,12 @@ fn main ()
             (args.next(), args.next())
         };
         let prog_name = mb_argv_0.unwrap();
-        mb_argv_1
-            .and_then(|argv_1| argv_1.parse().ok())
-            .ok_or_else(||
-                format!("Usage: {} <number>", prog_name)
-            )?
+        match mb_argv_1
+                .and_then(|argv_1| argv_1.parse().ok())
+        {
+            Some(number) => number,
+            _ => throw!(format!("Usage: {} <number>", prog_name)),
+        }
     };
     collatz_conjecture(input_number);
 }
