@@ -7,10 +7,10 @@ use ::std::{
     io::Write,
 };
 
+fallible! {
 /// Basic usage
-fallible!{
 fn main ()
-    -> ()
+    ->  ()
     =>! String
 :
     if try_print_all(&[0b101010, 0x45]).is_err() {
@@ -18,11 +18,11 @@ fn main ()
     };
 }
 
+fallible! {
 /// Using it with type parameters
-fallible!{
-pub fn try_print_all <T: fmt::Debug, Iterable: IntoIterator<Item = T>> (
+pub fn try_print_all <Iterable: IntoIterator<Item = impl fmt::Debug>> (
     iterable: Iterable,
-)   -> ()
+)   ->  ()
     =>! io::Error
 :
     let to_stdout = &mut io::stdout();
@@ -40,23 +40,23 @@ pub fn try_print_all <T: fmt::Debug, Iterable: IntoIterator<Item = T>> (
 trait TryInto<T> {
     type Err;
 
-    /// Using it with a function header
     fallible!(
+    /// Using it with a function header
     fn try_into (
         self: Self,
-    )   -> T
-        =>! Self::Err );
+    )   ->  T
+        =>! Self::Err);
 }
 
+fallible! {
 /// Using it with `where` clauses (/!\ Need braces /!\)
-fallible!{
 fn bar <X, Displayable> (
     x: X,
-)   -> String
+)   ->  String
     =>! X::Err
 where {
-    Displayable: fmt::Display,
-    X: TryInto<Displayable>,
+    Displayable : fmt::Display,
+    X : TryInto<Displayable>,
 } {
     let displayable = x.try_into()?;
     format!("{}", displayable)

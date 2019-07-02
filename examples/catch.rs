@@ -12,8 +12,8 @@ fn main ()
     debug_print_all([0b101010, 0x45].iter())
 }
 
-fn debug_print_all<T: fmt::Debug> (
-    iterable: impl IntoIterator<Item = T>,
+fn debug_print_all (
+    iterable: impl IntoIterator<Item = impl fmt::Debug>,
 )
 {
     let to_stdout = &mut io::stdout();
@@ -37,7 +37,7 @@ fn debug_print_all<T: fmt::Debug> (
     {
         Err(io_err) => {
             eprintln!(
-                "{:?} : could not write to stdout!? Oh well, who cares?",
+                "{} : could not write to stdout!? Oh well, who cares?",
                 io_err,
             );
         },

@@ -175,6 +175,7 @@ macro_rules! catch {
 macro_rules! fallible {
     // Main case
     (
+        $(#[$meta:meta])*
         $vis:vis
         fn $fname:ident {$($ty_params:tt)*}
             ($($args:tt)*)
@@ -184,6 +185,7 @@ macro_rules! fallible {
         }
             $fbody:tt
     ) => (
+        $(#[$meta])*
         $vis
         fn $fname <$($ty_params)*>
             ($($args)*)
@@ -205,13 +207,15 @@ macro_rules! fallible {
 
     // Ellision of where clause(s)
     (
+        $(#[$meta:meta])*
         $vis:vis
         fn $fname:ident {$($ty_params:tt)*}
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
         :
             $($fbody:tt)*
-    ) => (fallible!{
+    ) => (fallible! {
+        $(#[$meta])*
         $vis
         fn $fname {$($ty_params)*}
             ($($args)*)
@@ -222,13 +226,15 @@ macro_rules! fallible {
 
     // Ellision of type parameters (and thus where clause(s))
     (
+        $(#[$meta:meta])*
         $vis:vis
         fn $fname:ident
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
         :
             $($fbody:tt)*
-    ) => (fallible!{
+    ) => (fallible! {
+        $(#[$meta])*
         $vis
         fn $fname {}
             ($($args)*)
@@ -239,7 +245,8 @@ macro_rules! fallible {
 
     // Handle method signatures (traits) - Main case
     (
-        $(pub$(($($vis:tt)*))*)* // $vis:vis does not work here :(
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)? // $vis:vis does not work here :(
         fn $fname:ident {$($ty_params:tt)*}
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
@@ -247,7 +254,8 @@ macro_rules! fallible {
             $($wc:tt)*
         }
     ) => (
-        $(pub$(($($vis)*))*)*
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname <$($ty_params)*>
             ($($args)*)
         -> ::std::result::Result<$ret_ty, $err_ty>
@@ -258,12 +266,14 @@ macro_rules! fallible {
 
     // Handle method signatures (traits) - Ellision of where clause(s)
     (
-        $(pub$(($($vis:tt)*))*)* // $vis:vis does not work here :(
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)? // $vis:vis does not work here :(
         fn $fname:ident {$($ty_params:tt)*}
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
     ) => (fallible!{
-        $(pub$(($($vis)*))*)*
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname {$($ty_params)*}
             ($($args)*)
         -> $ret_ty =>! $err_ty
@@ -272,12 +282,14 @@ macro_rules! fallible {
 
     // Handle method signatures (traits) - Ellision of type parameters
     (
-        $(pub$(($($vis:tt)*))*)* // $vis:vis does not work here :(
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)? // $vis:vis does not work here :(
         fn $fname:ident
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
-    ) => (fallible!{
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! {
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname {}
             ($($args)*)
         -> $ret_ty =>! $err_ty
@@ -285,11 +297,13 @@ macro_rules! fallible {
 
     // start parsing type parameters
     (
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         < $($other:tt)*
-    ) => (fallible!{@unsugaring_ty_params
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! { @unsugaring_ty_params
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname
         [ < ] // depth
         {}    // type params
@@ -298,13 +312,14 @@ macro_rules! fallible {
 
     // end parsing type parameters
     (@unsugaring_ty_params
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         [ < ]
         $type_parameters:tt
         > $($other:tt)*
-    ) => (fallible!{
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! {
+        $(pub $(($($vis)*))?)?
         fn $fname
         $type_parameters
         $($other)*
@@ -312,13 +327,15 @@ macro_rules! fallible {
 
     // add one layer of depth
     (@unsugaring_ty_params
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         [ $($depth:tt)* ]
         {$($type_parameters:tt)*}
         < $($other:tt)*
-    ) => (fallible!{@unsugaring_ty_params
-        $(pub$(($($vis)*))*)* fn $fname
+    ) => (fallible! { @unsugaring_ty_params
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)? fn $fname
         [ $($depth)* < ]
         { $($type_parameters)* < }
         $($other)*
@@ -326,13 +343,15 @@ macro_rules! fallible {
 
     // remove one layer of depth
     (@unsugaring_ty_params
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         [ < $($depth:tt)* ]
         {$($type_parameters:tt)*}
         > $($other:tt)*
-    ) => (fallible!{@unsugaring_ty_params
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! { @unsugaring_ty_params
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname
         [ $($depth)* ]
         { $($type_parameters)* > }
@@ -341,13 +360,15 @@ macro_rules! fallible {
 
     // Disambiguate >> into > >
     (@unsugaring_ty_params
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         $depth:tt
         $type_parameters:tt
         >> $($other:tt)*
-    ) => (fallible!{@unsugaring_ty_params
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! { @unsugaring_ty_params
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname
         $depth
         $type_parameters
@@ -357,13 +378,15 @@ macro_rules! fallible {
 
     // parse one tt
     (@unsugaring_ty_params
-        $(pub$(($($vis:tt)*))*)*
+        $(#[$meta:meta])*
+        $(pub $(($($vis:tt)*))?)?
         fn $fname:ident
         $depth:tt
         { $($type_parameters:tt)* }
         $single_tt:tt $($other:tt)*
-    ) => (fallible!{@unsugaring_ty_params
-        $(pub$(($($vis)*))*)*
+    ) => (fallible! { @unsugaring_ty_params
+        $(#[$meta])*
+        $(pub $(($($vis)*))?)?
         fn $fname
         $depth
         { $($type_parameters)* $single_tt }

@@ -16,7 +16,7 @@ use ::std::*;
 
 type ErrorMsg = borrow::Cow<'static, str>;
 
-fallible!{
+fallible! {
 fn main ()
     ->  ()
     =>! ErrorMsg
@@ -66,8 +66,8 @@ fn main ()
     debug_print_all([0b101010, 0x45].iter())
 }
 
-fn debug_print_all<T: fmt::Debug> (
-    iterable: impl IntoIterator<Item = T>,
+fn debug_print_all (
+    iterable: impl IntoIterator<Item = impl fmt::Debug>,
 )
 {
     let to_stdout = &mut io::stdout();
@@ -106,7 +106,7 @@ fn debug_print_all<T: fmt::Debug> (
 
 - Add this line to your `Cargo.toml` (under `[dependencies]`):
   ```toml
-  candy = "0.1.3"
+  candy = "0.1.4"
   ```
 
 - Add this to your `.rs` code:
@@ -115,5 +115,5 @@ fn debug_print_all<T: fmt::Debug> (
   ```
 
 [Repository]: https://github.com/danielhenrymantilla/candy-rs
-[Documentation]: https://docs.rs/candy/0.1.3/
+[Documentation]: https://docs.rs/candy/0.1.4/
 [crates.io]: https://crates.io/crates/candy

@@ -6,7 +6,7 @@ use ::std::*;
 
 type ErrorMsg = borrow::Cow<'static, str>;
 
-fallible!{
+fallible! {
 fn main ()
     ->  ()
     =>! ErrorMsg
