@@ -177,7 +177,7 @@ macro_rules! fallible {
     (
         $(#[$meta:meta])*
         $vis:vis
-        fn $fname:ident {$($ty_params:tt)*}
+        fn $fname:ident $({$($ty_params:tt)*})?
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
         where {
@@ -187,7 +187,7 @@ macro_rules! fallible {
     ) => (
         $(#[$meta])*
         $vis
-        fn $fname <$($ty_params)*>
+        fn $fname $(<$($ty_params)*>)?
             ($($args)*)
         -> $crate::_core::result::Result<$ret_ty, $err_ty>
         where
@@ -247,7 +247,7 @@ macro_rules! fallible {
     (
         $(#[$meta:meta])*
         $(pub $(($($vis:tt)*))?)? // $vis:vis does not work here :(
-        fn $fname:ident {$($ty_params:tt)*}
+        fn $fname:ident $({$($ty_params:tt)*})?
             ($($args:tt)*)
         -> $ret_ty:ty =>! $err_ty:ty
         where {
@@ -256,7 +256,7 @@ macro_rules! fallible {
     ) => (
         $(#[$meta])*
         $(pub $(($($vis)*))?)?
-        fn $fname <$($ty_params)*>
+        fn $fname $(<$($ty_params)*>)?
             ($($args)*)
         -> ::std::result::Result<$ret_ty, $err_ty>
         where

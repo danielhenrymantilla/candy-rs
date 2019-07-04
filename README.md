@@ -106,7 +106,7 @@ fn debug_print_all (
 
 - Add this line to your `Cargo.toml` (under `[dependencies]`):
   ```toml
-  candy = "0.1.4"
+  candy = "0.1.5"
   ```
 
 - Add this to your `.rs` code:
@@ -115,5 +115,5 @@ fn debug_print_all (
   ```
 
 [Repository]: https://github.com/danielhenrymantilla/candy-rs
-[Documentation]: https://docs.rs/candy/0.1.4/
+[Documentation]: https://docs.rs/candy/0.1.5/
 [crates.io]: https://crates.io/crates/candy
